@@ -1,3 +1,5 @@
+"""Transports"""
+
 from .initiator_transport import initiate, start_initiator, InitiatorFactory, create_initiator
 from .initiator_handler import InitiatorHandler
 
