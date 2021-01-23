@@ -1,4 +1,4 @@
-""" Tests for FixReadBuffer"""
+""" Tests for FixReader"""
 
 from typing import Iterator, cast
 
@@ -6,7 +6,7 @@ from jetblack_fixengine.transports.fix_events import (
     FixReadError, FixReadEventType,
     FixReadDataReady
 )
-from jetblack_fixengine.transports.fix_read_buffer import FixReadBuffer
+from jetblack_fixengine.transports.fix_reader import FixReader
 
 
 def _bytes_writer(buf: bytes, chunk_size: int = -1) -> Iterator[bytes]:
@@ -22,7 +22,7 @@ def _bytes_writer(buf: bytes, chunk_size: int = -1) -> Iterator[bytes]:
 def test_read_valid_buffer():
     """Test for read"""
 
-    reader = FixReadBuffer(
+    reader = FixReader(
         sep=b'|',
         convert_sep_to_soh_for_checksum=True,
         validate=True
@@ -62,7 +62,7 @@ def test_read_valid_buffer():
 def test_read_corrupt_buffer():
     """Test for read"""
 
-    reader = FixReadBuffer(
+    reader = FixReader(
         sep=b'|',
         convert_sep_to_soh_for_checksum=True,
         validate=True

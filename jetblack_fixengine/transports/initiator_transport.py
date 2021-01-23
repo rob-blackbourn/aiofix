@@ -12,8 +12,8 @@ from ..types import Handler, Store
 from ..utils.cancellation import register_cancellation_event
 
 from .fix_transport import fix_stream_processor
-from .fix_read_buffer import FixReadBuffer
-from .fix_reader_async import fix_read_async
+from .fix_read_buffer import FixReader
+from .fix_reader_async import fix_reader_async
 from .initiator_handler import InitiatorHandler
 
 LOGGER = logging.getLogger(__name__)
@@ -44,8 +44,8 @@ async def initiate(
     )
 
     reader, writer = await asyncio.open_connection(host, port, ssl=ssl)
-    read_buffer = FixReadBuffer(sep, convert_sep_to_soh_for_checksum, validate)
-    buffered_reader = fix_read_async(read_buffer, reader, 1024)
+    read_buffer = FixReader(sep, convert_sep_to_soh_for_checksum, validate)
+    buffered_reader = fix_reader_async(read_buffer, reader, 1024)
     await fix_stream_processor(
         handler,
         shutdown_timeout,

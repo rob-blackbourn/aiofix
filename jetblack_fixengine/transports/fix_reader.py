@@ -43,7 +43,7 @@ class ReadState(IntEnum):
 StateResponse = Tuple[Optional[FixReadEvent], bool]
 
 
-class FixReadBuffer:
+class FixReader:
     """A state machine to parse FIX messages"""
 
     def __init__(
