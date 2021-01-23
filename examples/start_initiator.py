@@ -31,10 +31,11 @@ TZ = pytz.timezone('Europe/London')
 class MyInitiatorHandler(InitiatorHandler):
     """An instance of the initiator"""
 
-    async def on_logon(self) -> None:
-        LOGGER.info('on_logon')
+    async def on_logon(self, message: Optional[Mapping[str, Any]]) -> bool:
+        LOGGER.info('on_logon: %s', message)
+        return True
 
-    async def on_logout(self) -> None:
+    async def on_logout(self, message: Optional[Mapping[str, Any]]) -> None:
         LOGGER.info('on_logout')
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:

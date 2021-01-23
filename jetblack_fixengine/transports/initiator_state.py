@@ -28,33 +28,34 @@ class AdminEventType(Enum):
     LOGON_SENT = auto()
     LOGON_ACCEPTED = auto()
     LOGON_REJECTED = auto()
-    LOGON_ACKNOWLEDGED = auto()
+    LOGON_ACK = auto()
+    LOGON_NACK = auto()
     REJECT_ACKNOWLEDGED = auto()
     REJECT_RECEIVED = auto()
     HEARTBEAT_RECEIVED = auto()
-    HEARTBEAT_ACKNOWLEDGED = auto()
+    HEARTBEAT_ACK = auto()
     TEST_REQUEST_RECEIVED = auto()
     TEST_REQUEST_SENT = auto()
     RESEND_REQUEST_RECEIVED = auto()
     SEQUENCE_RESET_SENT = auto()
     SEQUENCE_RESET_RECEIVED = auto()
     INCOMING_SEQNUM_SET = auto()
+    XML_MESSAGE_RECEIVED = auto()
     LOGOUT_RECEIVED = auto()
-    LOGOUT_ACKNOWLEDGED = auto()
+    LOGOUT_ACK = auto()
 
 
 class AdminEvent:
 
-    ADMIN_MSGTYPE_EVENTS = {
-        'LOGON': AdminEventType.LOGON_RECEIVED,
-        'HEARTBEAT': AdminEventType.HEARTBEAT_RECEIVED,
-        'TEST_REQUEST': AdminEventType.TEST_REQUEST_RECEIVED,
-        'RESEND_REQUEST': AdminEventType.RESEND_REQUEST_RECEIVED,
-        'SEQUENCE_RESET': AdminEventType.SEQUENCE_RESET_RECEIVED,
-        'LOGOUT': AdminEventType.LOGOUT_RECEIVED
-        # TODO: These messages are not handled.
-        # REJECT
-        # XML_MESSAGE
+    ADMIN_MSGTYPE_EVENTS: Mapping[bytes, AdminEventType] = {
+        b'A': AdminEventType.LOGON_RECEIVED,
+        b'0': AdminEventType.HEARTBEAT_RECEIVED,
+        b'1': AdminEventType.TEST_REQUEST_RECEIVED,
+        b'2': AdminEventType.RESEND_REQUEST_RECEIVED,
+        b'4': AdminEventType.SEQUENCE_RESET_RECEIVED,
+        b'5': AdminEventType.LOGOUT_RECEIVED,
+        b'3': AdminEventType.REJECT_RECEIVED,
+        b'n': AdminEventType.XML_MESSAGE_RECEIVED
     }
 
     def __init__(
@@ -67,7 +68,7 @@ class AdminEvent:
 
     @classmethod
     def to_event_type(cls, fix_message: FixMessage):
-        return cls.ADMIN_MSGTYPE_EVENTS[fix_message['MsgType']]
+        return cls.ADMIN_MSGTYPE_EVENTS[fix_message.meta_data.msgtype]
 
 
 class AdminStateMachine:
@@ -78,12 +79,13 @@ class AdminStateMachine:
         (AdminState.LOGON_REQUESTED, AdminEventType.LOGON_SENT): AdminState.LOGON_EXPECTED,
         (AdminState.LOGON_EXPECTED, AdminEventType.LOGON_RECEIVED): AdminState.LOGON_ACCEPTED,
         (AdminState.LOGON_EXPECTED, AdminEventType.REJECT_RECEIVED): AdminState.LOGON_REJECTED,
-        (AdminState.LOGON_ACCEPTED, AdminEventType.LOGON_ACKNOWLEDGED): AdminState.PENDING,
+        (AdminState.LOGON_ACCEPTED, AdminEventType.LOGON_ACK): AdminState.PENDING,
+        (AdminState.LOGON_ACCEPTED, AdminEventType.LOGON_NACK): AdminState.STOP,
         (AdminState.LOGON_REJECTED, AdminEventType.REJECT_ACKNOWLEDGED): AdminState.STOP,
 
         # Acceptor heartbeet
         (AdminState.PENDING, AdminEventType.HEARTBEAT_RECEIVED): AdminState.ACKNOWLEDGE_HEARTBEAT,
-        (AdminState.ACKNOWLEDGE_HEARTBEAT, AdminEventType.HEARTBEAT_ACKNOWLEDGED): AdminState.PENDING,
+        (AdminState.ACKNOWLEDGE_HEARTBEAT, AdminEventType.HEARTBEAT_ACK): AdminState.PENDING,
 
         # Test Request
         (AdminState.PENDING, AdminEventType.TEST_REQUEST_RECEIVED): AdminState.TEST_REQUEST_REQUESTED,
@@ -99,7 +101,7 @@ class AdminStateMachine:
 
         # Logout
         (AdminState.PENDING, AdminEventType.LOGOUT_RECEIVED): AdminState.ACKNOWLEDGE_LOGOUT,
-        (AdminState.ACKNOWLEDGE_LOGOUT, AdminEventType.LOGOUT_ACKNOWLEDGED): AdminState.STOP
+        (AdminState.ACKNOWLEDGE_LOGOUT, AdminEventType.LOGOUT_ACK): AdminState.STOP
     }
 
     def __init__(self):

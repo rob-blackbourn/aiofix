@@ -26,14 +26,14 @@ def test_admin_states():
     assert next_state == AdminState.LOGON_EXPECTED
     next_state = state_machine.next_event(AdminEventType.LOGON_RECEIVED)
     assert next_state == AdminState.LOGON_ACCEPTED
-    next_state = state_machine.next_event(AdminEventType.LOGON_ACKNOWLEDGED)
+    next_state = state_machine.next_event(AdminEventType.LOGON_ACK)
     assert next_state == AdminState.PENDING
 
     # Heartbeat
     next_state = state_machine.next_event(AdminEventType.HEARTBEAT_RECEIVED)
     assert next_state == AdminState.ACKNOWLEDGE_HEARTBEAT
     next_state = state_machine.next_event(
-        AdminEventType.HEARTBEAT_ACKNOWLEDGED)
+        AdminEventType.HEARTBEAT_ACK)
     assert next_state == AdminState.PENDING
 
     # Test request
@@ -59,7 +59,7 @@ def test_admin_states():
     # Logout
     next_state = state_machine.next_event(AdminEventType.LOGOUT_RECEIVED)
     assert next_state == AdminState.ACKNOWLEDGE_LOGOUT
-    next_state = state_machine.next_event(AdminEventType.LOGOUT_ACKNOWLEDGED)
+    next_state = state_machine.next_event(AdminEventType.LOGOUT_ACK)
     assert next_state == AdminState.STOP
 
 
@@ -69,13 +69,13 @@ async def test_async_admin_state_machine():
         return AdminEventType.LOGON_SENT
 
     async def logon_received(_fix_mesage: Optional[FixMessage]) -> Optional[AdminEventType]:
-        return AdminEventType.LOGON_ACKNOWLEDGED
+        return AdminEventType.LOGON_ACK
 
     async def acknowledge_logon(_fix_message: Optional[FixMessage]) -> Optional[AdminEventType]:
         return None
 
     async def acknowledge_heartbeat(_fix_mesage: Optional[FixMessage]) -> Optional[AdminEventType]:
-        return AdminEventType.HEARTBEAT_ACKNOWLEDGED
+        return AdminEventType.HEARTBEAT_ACK
 
     async def send_test_request(_fix_mesage: Optional[FixMessage]) -> Optional[AdminEventType]:
         return AdminEventType.TEST_REQUEST_SENT
@@ -84,12 +84,12 @@ async def test_async_admin_state_machine():
         return AdminEventType.SEQUENCE_RESET_SENT
 
     async def acknowledge_logout(_fix_mesage: Optional[FixMessage]) -> Optional[AdminEventType]:
-        return AdminEventType.LOGOUT_ACKNOWLEDGED
+        return AdminEventType.LOGOUT_ACK
 
     state_machine = AsyncAdminStateMachine({
         (AdminState.START, AdminEventType.CONNECTED): send_logon,
         (AdminState.LOGON_EXPECTED, AdminEventType.LOGON_RECEIVED): logon_received,
-        (AdminState.LOGON_ACCEPTED, AdminEventType.LOGON_ACKNOWLEDGED): acknowledge_logon,
+        (AdminState.LOGON_ACCEPTED, AdminEventType.LOGON_ACK): acknowledge_logon,
 
         (AdminState.PENDING, AdminEventType.HEARTBEAT_RECEIVED): acknowledge_heartbeat,
         (AdminState.PENDING, AdminEventType.TEST_REQUEST_RECEIVED): send_test_request,

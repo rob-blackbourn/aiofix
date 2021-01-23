@@ -12,10 +12,16 @@
         "editor.rulers": [80]
     },
     "cSpell.words": [
+        "FPML",
+        "IOIID",
+        "ISDA",
         "JSONFIX",
         "NUMINGROUP",
         "SEQNUM",
+        "SICOVAM",
         "SYNCHRONISING",
+        "VALOREN",
+        "WERTPAPIER",
         "aiofiles",
         "aiosqlite",
         "aiter",
