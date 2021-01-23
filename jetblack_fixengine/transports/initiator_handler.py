@@ -10,6 +10,14 @@ from jetblack_fixparser.fix_message import FixMessageFactory, FixMessage
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
+from ..utils.json_utils import dict_to_json
+
+from .initiator_state import (
+    AsyncAdminStateMachine,
+    AdminState,
+    AdminEvent,
+    AdminEventType
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -89,7 +97,11 @@ class InitiatorHandler(metaclass=ABCMeta):
             send_time_utc,
             message
         )
-        LOGGER.info('sending: %s', fix_message.message)
+        LOGGER.info(
+            'Sending [%s]: %s',
+            fix_message.meta_data.msgcat,
+            dict_to_json(fix_message.message)
+        )
         event = {
             'type': 'fix',
             'message': fix_message.encode(regenerate_integrity=True)
@@ -169,8 +181,6 @@ class InitiatorHandler(metaclass=ABCMeta):
         )
 
     async def _on_admin_message(self, message: Mapping[str, Any]) -> bool:
-        LOGGER.info('on_admin_message: %s', message)
-
         # Only handle if unhandled by the overrideing method.
         override_status = await self.on_admin_message(message)
         if override_status is not None:
@@ -235,9 +245,15 @@ class InitiatorHandler(metaclass=ABCMeta):
 
     async def _handle_event(self, event: Event) -> bool:
         if event['type'] == 'fix':
-            await self._session.save_message(event['message'])
-
             fix_message: FixMessage = event['fix_message']
+
+            LOGGER.info(
+                'Received [%s]: %s',
+                fix_message.meta_data.msgcat,
+                dict_to_json(fix_message.message)
+            )
+
+            await self._session.save_message(event['message'])
 
             msgcat = cast(str, fix_message.meta_data.msgcat)
             if msgcat == 'admin':
