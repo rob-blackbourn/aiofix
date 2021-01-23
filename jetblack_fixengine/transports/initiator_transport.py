@@ -1,10 +1,9 @@
 """Initiator transport"""
 
 import asyncio
-from datetime import tzinfo, time
 import logging
 from ssl import SSLContext
-from typing import Optional, Callable, Type, Tuple
+from typing import Optional, Callable, Type
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
@@ -72,9 +71,7 @@ def create_initiator(
         heartbeat_timeout: int,
         cancellation_event: asyncio.Event,
         *,
-        heartbeat_threshold: int = 1,
-        logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: Optional[tzinfo] = None
+        heartbeat_threshold: int = 1
 ) -> InitiatorHandler:
     handler = klass(
         protocol,
@@ -83,9 +80,7 @@ def create_initiator(
         store,
         heartbeat_timeout,
         cancellation_event,
-        heartbeat_threshold=heartbeat_threshold,
-        logon_time_range=logon_time_range,
-        tz=tz
+        heartbeat_threshold=heartbeat_threshold
     )
     return handler
 
@@ -102,10 +97,7 @@ def start_initiator(
         *,
         ssl: Optional[SSLContext] = None,
         shutdown_timeout: float = 10.0,
-        heartbeat_threshold: int = 1,
-        logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: Optional[tzinfo] = None
-
+        heartbeat_threshold: int = 1
 ) -> None:
     cancellation_event = asyncio.Event()
     loop = asyncio.get_event_loop()
@@ -119,9 +111,7 @@ def start_initiator(
         store,
         heartbeat_timeout,
         cancellation_event,
-        heartbeat_threshold=heartbeat_threshold,
-        logon_time_range=logon_time_range,
-        tz=tz
+        heartbeat_threshold=heartbeat_threshold
     )
 
     loop.run_until_complete(

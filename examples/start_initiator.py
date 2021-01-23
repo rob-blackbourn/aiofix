@@ -1,11 +1,8 @@
 """A simple Initiator"""
 
-from datetime import time
 import logging
 import os.path
 from typing import Mapping, Any, Optional
-
-import pytz
 
 from jetblack_fixparser.loader import load_yaml_protocol
 from jetblack_fixengine.persistence import FileStore
@@ -25,7 +22,6 @@ SENDER_COMP_ID = 'INITIATOR1'
 TARGET_COMP_ID = 'ACCEPTOR'
 HEARTBEAT_TIMEOUT = 30
 PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
-TZ = pytz.timezone('Europe/London')
 
 
 class MyInitiatorHandler(InitiatorHandler):
@@ -56,7 +52,5 @@ start_initiator(
     TARGET_COMP_ID,
     STORE,
     HEARTBEAT_TIMEOUT,
-    shutdown_timeout=10,
-    logon_time_range=(time(0, 30, 0), time(23, 30, 0)),
-    tz=TZ
+    shutdown_timeout=10
 )
