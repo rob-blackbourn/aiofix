@@ -206,9 +206,10 @@ class InitiatorHandler(metaclass=ABCMeta):
         """
         ...
 
-    async def _handle_event(self, event: Event) -> bool:
+    async def _handle_event(self, event: Event) -> None:
         if event['type'] == 'fix':
-            fix_message: FixMessage = event['fix_message']
+
+            fix_message = self.fix_message_factory.decode(event['message'])
 
             LOGGER.info(
                 'Received [%s]: %s',
@@ -230,15 +231,13 @@ class InitiatorHandler(metaclass=ABCMeta):
 
             self._last_receive_time = datetime.now(timezone.utc)
 
-            return status
-
         elif event['type'] == 'error':
             LOGGER.warning('error')
-            return False
+            self._state_machine.state = AdminState.STOP
         elif event['type'] == 'disconnect':
-            return False
+            self._state_machine.state = AdminState.STOP
         else:
-            return False
+            self._state_machine.state = AdminState.STOP
 
     async def _handle_heartbeat(self) -> float:
         timestamp = datetime.now(timezone.utc)
@@ -289,8 +288,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             LOGGER.info('connected')
             await self._state_machine.handle_event(AdminEventType.CONNECTED, None)
 
-            ok = True
-            while ok:
+            while self._state_machine.state != AdminState.STOP:
                 try:
                     timeout = await self._handle_heartbeat()
 
@@ -299,12 +297,7 @@ class InitiatorHandler(metaclass=ABCMeta):
                         timeout=timeout
                     )
 
-                    if event['type'] == 'fix':
-                        event['fix_message'] = self.fix_message_factory.decode(
-                            event['message']
-                        )
-
-                    ok = await self._handle_event(event)
+                    await self._handle_event(event)
                 except asyncio.TimeoutError:
                     await self._handle_timeout()
         else:
