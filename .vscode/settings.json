@@ -22,6 +22,8 @@
         "SYNCHRONISING",
         "VALOREN",
         "WERTPAPIER",
+        "aenter",
+        "aexit",
         "aiofiles",
         "aiosqlite",
         "aiter",

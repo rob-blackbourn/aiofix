@@ -8,8 +8,11 @@ from typing import Mapping, Any, Optional
 
 from jetblack_fixparser.loader import load_yaml_protocol
 from jetblack_fixengine.persistence import FileStore
-# from jetblack_fixengine.transports import start_initiator, InitiatorHandler
-from jetblack_fixengine.transports import InitiatorConnector, Initiator
+from jetblack_fixengine.transports import (
+    InitiatorConnector,
+    Initiator,
+    LogonResponseEvent
+)
 from jetblack_fixengine.utils.cancellation import register_cancellation_event
 
 
@@ -36,17 +39,16 @@ async def main():
         cancellation_event,
         loop
     )
-    connector = InitiatorConnector(
-        HOST,
-        PORT,
-        PROTOCOL,
-        SENDER_COMP_ID,
-        TARGET_COMP_ID,
-        STORE,
-        HEARTBEAT_TIMEOUT,
-        cancellation_event
-    )
-    async with connector as initiator:
+    async with InitiatorConnector(
+            HOST,
+            PORT,
+            PROTOCOL,
+            SENDER_COMP_ID,
+            TARGET_COMP_ID,
+            STORE,
+            HEARTBEAT_TIMEOUT,
+            cancellation_event
+    ) as initiator:
         async for event in initiator:
             if event['type'] == 'logon.request':
                 LOGGER.info('login requested')
