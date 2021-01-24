@@ -1,12 +1,9 @@
 """Transports"""
 
-from .initiator_transport import initiate, start_initiator, InitiatorFactory, create_initiator
-from .initiator_handler import InitiatorHandler
+from .initiator import Initiator
+from .initiator_connector import InitiatorConnector
 
 __all__ = [
-    'initiate',
-    'start_initiator',
-    'InitiatorHandler',
-    'InitiatorFactory',
-    'create_initiator'
+    'Initiator',
+    'InitiatorConnector'
 ]

@@ -7,7 +7,7 @@ from .fix_events import FixReadEventType, FixReadDataReady
 from .fix_reader import FixReader
 
 
-async def fix_reader_async(
+async def async_fix_reader(
         fix_reader: FixReader,
         stream_reader: StreamReader,
         blksiz: int

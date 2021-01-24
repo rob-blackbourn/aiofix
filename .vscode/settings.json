@@ -46,7 +46,8 @@
         "strftime",
         "strptime",
         "tzinfo",
-        "tzlocal"
+        "tzlocal",
+        "ungrouped"
     ],
     "python.testing.pytestArgs": [
         "tests"
